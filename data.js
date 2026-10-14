@@ -119,7 +119,7 @@ const PROLOG = {
   peta: 'assets/peta-prolog.png',   // gambar kotak di pilihan map (rasio 3 : 2), beda dari background
   kecepatan: 200,
   panjang: 4800,
-  gantiBajuDi: 2300,
+  gantiBajuDi: 4400,
   rintangan: ['kotak', 'kerucut'],
   pengejar: { nama: 'Alarm kuliah', gambar: 'assets/pengejar-alarm.png', lebar: 150, tinggi: 150, melayang: 0, gerak: 'lari' }
 };

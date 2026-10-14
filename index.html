@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Lari Promed</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- ===== AREA GAME: background, rintangan, gerbang, karakter ===== -->
+  <div id="stage">
+    <div id="world">
+      <div id="bg"></div>
+      <div id="papan"></div>
+      <div id="rintangan"></div>
+      <div id="pengejar"><img id="pengejarImg" alt="" draggable="false"></div>
+      <div id="gate"><b id="gateText"></b></div>
+      <div id="teksKena"></div>
+      <div id="player">
+        <!-- urutan = lapisan dari belakang ke depan -->
+        <div id="tubuh">
+          <img id="pTanganKiri"  class="bagian" alt="" draggable="false">
+          <img id="pKakiKiri"    class="bagian" alt="" draggable="false">
+          <img id="pBadan"       class="bagian" alt="Karakter" draggable="false">
+          <img id="pKakiKanan"   class="bagian" alt="" draggable="false">
+          <img id="pTanganKanan" class="bagian" alt="" draggable="false">
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="flash"></div>
+  <div id="kena"></div>
+
+  <!-- ===== HALAMAN AWAL ===== -->
+  <section id="welcome" class="screen">
+    <div class="welcome-box">
+      <p class="kicker">Pengenalan peminatan Promed</p>
+      <h1>Lari <span>Promed</span></h1>
+      <div class="card">
+        <p>Berlari di kampus, ganti jas dokter di tengah jalan, lalu pilih peminatan yang mau kamu jelajahi. Lima map, lima peminatan, satu ending.</p>
+        <div class="row">
+          <button id="btnMain" class="btn primary big">Main</button>
+          <button id="btnLanjut" class="btn" hidden>Lanjutkan</button>
+          <button id="btnCara" class="btn">Cara bermain</button>
+        </div>
+        <button id="btnLayarPenuh" class="link">Layar penuh</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== TAMPILAN SAAT BERMAIN ===== -->
+  <section id="hud" hidden>
+    <div class="bar"><i id="progres"></i></div>
+    <div class="hud-row">
+      <span class="chip" id="namaLevel"></span>
+      <span class="chip hati" id="nyawa"></span>
+      <span class="tools">
+        <button id="btnJeda" class="btn small">Jeda</button>
+        <button id="btnLayarPenuh2" class="btn small">Layar penuh</button>
+      </span>
+    </div>
+    <div id="banner" hidden><span>Ganti pakaian!</span></div>
+    <div id="toast" hidden></div>
+  </section>
+
+  <!-- ===== PANEL-PANEL ===== -->
+  <div id="how" class="overlay" hidden>
+    <div class="panel kecil">
+      <h2>Cara bermain</h2>
+      <ul>
+        <li>Lompat dengan Spasi, panah atas, tombol W, atau ketuk layar.</li>
+        <li>Hindari semua rintangan. Tiap tabrakan membuat pengejar makin dekat, dan tiga kali tabrakan berarti kamu tertangkap.</li>
+        <li>Di prolog, karaktermu berganti ke jas dokter, lalu kamu memilih map.</li>
+        <li>Di ujung tiap map ada informasi peminatan.</li>
+        <li>Selesaikan kelima map untuk membuka ending.</li>
+        <li>Tekan Esc atau P untuk jeda.</li>
+      </ul>
+      <div class="row"><button id="btnMengerti" class="btn primary">Mengerti</button></div>
+    </div>
+  </div>
+
+  <div id="pause" class="overlay" hidden>
+    <div class="panel kecil">
+      <h2>Dijeda</h2>
+      <div class="row">
+        <button id="btnLanjutMain" class="btn primary">Lanjut</button>
+        <button id="btnUlangi" class="btn">Ulangi level</button>
+        <button id="btnMenu" class="btn">Menu utama</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pilih map: bagan bercabang. Isinya dibuat otomatis oleh game.js -->
+  <div id="select" class="overlay" hidden>
+    <div class="sel-screen">
+      <header class="sel-top"><h2>Pilih peminatan</h2><span id="selHitung"></span></header>
+      <div class="sel-body">
+        <div class="bracket" id="bracket">
+          <svg class="links" id="garis" aria-hidden="true"></svg>
+          <div class="col" id="kolAwal"></div>
+          <div class="col" id="kol1"></div>
+          <div class="col" id="kol2"></div>
+          <div class="col" id="kolAkhir"></div>
+        </div>
+      </div>
+      <footer class="sel-bot"><span id="selPetunjuk"></span></footer>
+    </div>
+  </div>
+
+  <!-- Informasi peminatan di ujung map -->
+  <div id="info" class="overlay" hidden>
+    <div class="panel">
+      <div class="band" id="infoBand">
+        <p class="kicker">Ujung map · Peminatan</p>
+        <h2 id="infoNama"></h2>
+      </div>
+      <p id="infoPeminatan" class="peminatan" hidden></p>
+      <p id="infoPengantar"></p>
+      <h3 class="sub">Yang kamu pelajari</h3>
+      <ul id="infoBelajar"></ul>
+      <div id="infoStudio" hidden>
+        <h3 class="sub">Tentang studio</h3>
+        <p id="infoStudioDeskripsi"></p>
+        <p id="infoStudioCore"></p>
+        <h3 class="sub">Peran studio</h3>
+        <p id="infoStudioPeran"></p>
+        <h3 class="sub">Fokus studio</h3>
+        <p id="infoStudioFokus"></p>
+      </div>
+      <div id="infoKarierBox">
+        <h3 class="sub">Arah karier</h3>
+        <p id="infoKarier"></p>
+      </div>
+      <div class="row"><button id="btnSelesaiLevel" class="btn primary">Selesaikan level</button></div>
+    </div>
+  </div>
+
+  <div id="over" class="overlay" hidden>
+    <div class="panel kecil">
+      <h2>Tertangkap!</h2>
+      <p id="overTeks">Coba lagi, waktu lompat yang tepat lebih penting daripada cepat.</p>
+      <div class="row">
+        <button id="btnCoba" class="btn primary">Ulangi level</button>
+        <button id="btnPilihLain" class="btn" hidden>Pilih map lain</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="ending" class="overlay" hidden>
+    <div class="panel">
+      <p class="kicker">Ending</p>
+      <h2>Lima peminatan, semuanya sudah kamu lewati.</h2>
+      <p>Tidak ada pilihan yang salah di sini. Yang penting kamu tahu apa yang membuatmu mau terus berlari.</p>
+      <ul id="endDaftar"></ul>
+      <div class="row">
+        <button id="btnDariAwal" class="btn primary">Main dari awal</button>
+        <button id="btnLihatLagi" class="btn">Lihat peminatan lagi</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Muncul kalau HP dipegang tegak saat bermain -->
+  <div id="putar"><p>Putar HP ke mode landscape untuk bermain.</p></div>
+
+  <script src="data.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>

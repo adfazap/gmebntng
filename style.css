@@ -1,0 +1,310 @@
+/* =====================================================
+   style.css  -  TAMPILAN
+   Gambar background dan karakter TIDAK dibuat di sini,
+   semuanya diambil dari folder assets (lihat data.js).
+   ===================================================== */
+
+:root {
+  --ink: #12263a;
+  --sun: #ffc83d;
+  --coral: #ff5d73;
+  --teal: #0b8f8f;
+  --putih: #ffffff;
+  --display: 'Lilita One', 'Trebuchet MS', system-ui, sans-serif;
+  --body: 'Nunito', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { height: 100%; margin: 0; overflow: hidden; }
+body {
+  background: #000;
+  color: var(--ink);
+  font: 600 16px/1.5 var(--body);
+  -webkit-tap-highlight-color: transparent;
+}
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 3px solid var(--teal); outline-offset: 3px; }
+
+
+/* ---------- AREA GAME ----------
+   #world tingginya selalu 400px, lalu diperbesar oleh game.js agar memenuhi layar. */
+#stage {
+  position: fixed; inset: 0; overflow: hidden; z-index: 0;
+  touch-action: none; user-select: none; -webkit-user-select: none;
+}
+#world {
+  position: absolute; left: 0; top: 0; height: 400px;
+  transform-origin: 0 0;
+  /* nilai ini diisi game.js */
+  --tanah: 60px; --px: 150px; --tinggi-karakter: 130px;
+}
+
+/* Background: harus bisa disambung ke kiri-kanan (seamless) supaya terlihat berjalan */
+#bg {
+  position: absolute; inset: 0;
+  background-color: #6fb5d6;
+  background-repeat: repeat-x;
+  background-size: auto 100%;
+  background-position: 0 0;
+}
+#rintangan { position: absolute; inset: 0; }
+
+/* Pengejar: ukuran dan tinggi diisi game.js dari data.js */
+#pengejar { position: absolute; left: 0; will-change: transform; pointer-events: none; }
+#pengejar img { display: block; width: 100%; height: 100%; object-fit: contain; }
+.rintangan {
+  position: absolute; left: 0; bottom: var(--tanah);
+  background-size: 100% 100%; background-repeat: no-repeat;
+}
+
+/* Papan informasi (infografis) di pinggir jalan. Isinya diatur di data.js (papan). */
+#papan { position: absolute; inset: 0; pointer-events: none; }
+.papan { position: absolute; left: 0; bottom: var(--tanah); height: 104px; --warna: #0f5c75; }
+.papan::before, .papan::after {
+  content: ''; position: absolute; bottom: 0; width: 9px; height: 104px;
+  background: linear-gradient(90deg, #4a4150, #2b242f); border-radius: 2px 2px 0 0;
+}
+.papan::before { left: 12%; }
+.papan::after { right: 12%; }
+.papan .kartu {
+  position: absolute; left: 0; right: 0; bottom: 104px; overflow: hidden;
+  background: #fffaf0; color: var(--ink);
+  border: 3px solid var(--ink); border-radius: 9px; box-shadow: 0 4px 0 rgba(0, 0, 0, .35);
+}
+.papan .kepala { padding: 6px 11px 7px; background: var(--warna); color: #fff; }
+.papan .kepala small { display: block; font: 800 9.5px/1.2 var(--body); letter-spacing: .15em; text-transform: uppercase; opacity: .9; }
+.papan .kepala b { display: block; margin-top: 1px; font: 400 17px/1.1 var(--display); text-wrap: balance; }
+.papan .badan { padding: 8px 11px 10px; font: 600 11.5px/1.38 var(--body); }
+.papan .badan p { margin: 0; }
+.papan .tags { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; margin-top: 7px; }
+.papan .tags em { font: 800 9px/1 var(--body); font-style: normal; letter-spacing: .12em; text-transform: uppercase; color: #6b6470; margin-right: 2px; }
+.papan .tag { padding: 3px 7px; border: 2px solid var(--warna); border-radius: 99px; font: 800 10px/1 var(--body); color: var(--warna); background: #fff; }
+
+/* Gerbang di ujung level */
+#gate { position: absolute; left: 0; bottom: var(--tanah); width: 130px; height: 140px; }
+#gate::before, #gate::after {
+  content: ''; position: absolute; bottom: 0; width: 8px; height: 130px; background: var(--ink);
+}
+#gate::before { left: 0; }
+#gate::after { right: 0; }
+#gate b {
+  position: absolute; top: 0; left: -6px; right: -6px; height: 38px; z-index: 1;
+  display: grid; place-items: center;
+  background: var(--sun); border: 3px solid var(--ink); border-radius: 6px;
+  font: 800 13px var(--body); color: var(--ink);
+}
+
+/* Karakter */
+#player { position: absolute; left: var(--px); bottom: var(--tanah); will-change: transform; }
+/* Karakter = tumpukan 5 gambar seukuran. Lebarnya diisi game.js sesuai rasio gambar. */
+#tubuh { position: relative; height: var(--tinggi-karakter); width: 65px; transform-origin: 50% 100%; }
+#tubuh .bagian { position: absolute; left: 0; top: 0; width: 100%; height: 100%; display: block; }
+#player.blink { animation: kedip .15s steps(1) infinite alternate; }
+#player.spin #tubuh { animation: putar 1s linear; }
+
+@keyframes kedip { from { opacity: 1; } to { opacity: .25; } }
+@keyframes putar { to { transform: rotateY(360deg); } }
+
+/* ---------- EFEK TABRAKAN ---------- */
+#stage.getar { animation: getar .4s; }
+@keyframes getar {
+  0%, 100% { transform: translate(0, 0); }
+  20% { transform: translate(-9px, 3px); }
+  40% { transform: translate(8px, -4px); }
+  60% { transform: translate(-6px, 2px); }
+  80% { transform: translate(4px, -2px); }
+}
+
+/* salto saat lompat ganda (memakai properti rotate supaya tidak mengganggu animasi tangan dan kaki) */
+#tubuh.salto { transform-origin: 50% 60%; animation: salto .5s ease-in-out; }
+@keyframes salto { from { rotate: 0deg; } to { rotate: 360deg; } }
+
+/* pinggiran layar memerah */
+#kena {
+  position: fixed; inset: 0; z-index: 4; pointer-events: none; opacity: 0;
+  box-shadow: inset 0 0 140px 30px rgba(255, 30, 60, .85);
+}
+#kena.on { animation: merah .5s ease-out; }
+@keyframes merah { from { opacity: 1; } to { opacity: 0; } }
+
+/* rintangan bergoyang (memakai properti rotate supaya tidak mengganggu posisinya) */
+.rintangan.goyang { transform-origin: 50% 100%; animation: goyang .45s; }
+@keyframes goyang {
+  0%, 100% { rotate: 0deg; }
+  20% { rotate: -10deg; }
+  40% { rotate: 8deg; }
+  60% { rotate: -5deg; }
+  80% { rotate: 3deg; }
+}
+
+/* teks "Aduh!" naik dari kepala karakter */
+#teksKena {
+  position: absolute; left: 0; z-index: 3; pointer-events: none; opacity: 0; white-space: nowrap;
+  bottom: calc(var(--tanah) + var(--tinggi-karakter) + 10px);
+  font: 400 40px var(--display); color: var(--coral);
+  -webkit-text-stroke: 2px var(--ink); text-shadow: 0 3px 0 var(--ink);
+}
+#teksKena.on { animation: naik .8s ease-out; }
+@keyframes naik {
+  0%   { opacity: 1; transform: translate(-50%, 10px) scale(.6); }
+  20%  { opacity: 1; transform: translate(-50%, 0) scale(1.2); }
+  100% { opacity: 0; transform: translate(-50%, -60px) scale(1); }
+}
+
+/* Kilat putih saat ganti pakaian */
+#flash {
+  position: fixed; inset: 0; z-index: 4; background: #fff;
+  opacity: 0; pointer-events: none; transition: opacity .5s;
+}
+#flash.on { opacity: 1; transition: none; }
+
+
+/* ---------- TOMBOL ---------- */
+.btn {
+  font: 800 1rem var(--body);
+  padding: .8rem 1.5rem; border-radius: 12px;
+  border: 2px solid var(--ink); background: var(--putih); color: var(--ink);
+  cursor: pointer; box-shadow: 0 4px 0 var(--ink);
+}
+.btn:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--ink); }
+.btn.primary { background: var(--sun); }
+.btn.big { font-size: 1.3rem; padding: .9rem 2.4rem; }
+.btn.small { padding: .4rem .85rem; font-size: .85rem; box-shadow: 0 3px 0 var(--ink); }
+.link {
+  background: none; border: 0; padding: .2rem 0; color: #fff; opacity: .9;
+  text-decoration: underline; font: 800 .85rem var(--body); cursor: pointer; align-self: flex-start;
+}
+.row { display: flex; gap: 12px; flex-wrap: wrap; }
+.kicker { margin: 0; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; font-size: .8rem; color: var(--teal); }
+
+
+/* ---------- HALAMAN AWAL ---------- */
+.screen {
+  position: fixed; inset: 0; z-index: 5; display: flex; overflow-y: auto;
+  padding: max(20px, env(safe-area-inset-top, 0px)) clamp(20px, 6vw, 96px) max(20px, env(safe-area-inset-bottom, 0px));
+}
+.welcome-box {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 16px;
+  width: 100%; max-width: 520px; margin-block: auto;
+}
+.welcome-box .kicker { background: var(--ink); color: #fff; padding: .3rem .9rem; border-radius: 99px; }
+.welcome-box h1 {
+  margin: 0; font: 400 clamp(3.6rem, 13vw, 7.5rem)/.88 var(--display);
+  color: #fff; -webkit-text-stroke: 2px var(--ink); text-shadow: 0 6px 0 var(--ink);
+}
+.welcome-box h1 span { display: inline-block; color: var(--coral); transform: rotate(-2deg); }
+.card {
+  background: rgba(18, 38, 58, .86); color: #fff;
+  border: 3px solid var(--ink); border-radius: 18px; padding: 22px;
+  display: flex; flex-direction: column; gap: 16px; width: 100%; box-shadow: 0 6px 0 var(--ink);
+}
+.card p { margin: 0; }
+
+
+/* ---------- TAMPILAN SAAT BERMAIN ---------- */
+#hud { position: fixed; inset: 0; z-index: 5; pointer-events: none; }
+#hud button { pointer-events: auto; }
+.bar { position: absolute; left: 0; right: 0; top: env(safe-area-inset-top, 0px); height: 8px; background: rgba(18, 38, 58, .35); }
+.bar i { display: block; height: 100%; width: 0; background: var(--sun); }
+.hud-row {
+  position: absolute; left: 0; right: 0; top: calc(env(safe-area-inset-top, 0px) + 8px);
+  padding: 12px 16px 0; display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; flex-wrap: wrap;
+}
+.chip { background: rgba(18, 38, 58, .8); color: #fff; border-radius: 99px; padding: .3rem .9rem; font: 400 1.05rem/1.3 var(--display); }
+.hati { color: var(--coral); font-size: 1.3rem; letter-spacing: 2px; }
+.tools { display: flex; gap: 8px; flex-wrap: wrap; }
+#banner { position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none; }
+#banner span {
+  font: 400 clamp(2rem, 8vw, 4.2rem)/1 var(--display); color: #fff; text-align: center; padding: 0 12px;
+  -webkit-text-stroke: 2px var(--ink); text-shadow: 0 5px 0 var(--ink); transform: rotate(-3deg);
+}
+#toast {
+  position: absolute; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%);
+  max-width: 90vw; background: rgba(18, 38, 58, .85); color: #fff;
+  padding: .5rem 1.1rem; border-radius: 99px; font-weight: 800; text-align: center;
+}
+
+
+/* ---------- PANEL ---------- */
+.overlay {
+  position: fixed; inset: 0; z-index: 10; display: flex; justify-content: center; overflow-y: auto;
+  padding: max(16px, env(safe-area-inset-top, 0px)) 16px max(16px, env(safe-area-inset-bottom, 0px));
+  background: rgba(18, 38, 58, .78);
+}
+.panel {
+  margin-block: auto; width: 100%; max-width: 720px; background: #fff;
+  border: 3px solid var(--ink); border-radius: 18px; padding: 24px; box-shadow: 0 8px 0 var(--ink);
+}
+.panel.kecil { max-width: 460px; }
+.panel h2 { margin: 0 0 8px; font: 400 clamp(1.7rem, 5vw, 2.4rem)/1.05 var(--display); text-wrap: balance; }
+.panel p { margin: 0 0 14px; max-width: 65ch; }
+.panel .row { margin-top: 18px; }
+.panel h3.sub { margin: 18px 0 6px; font: 800 .8rem var(--body); letter-spacing: .12em; text-transform: uppercase; color: var(--teal); }
+.panel ul { margin: 0; padding-left: 1.2rem; display: grid; gap: 6px; max-width: 65ch; }
+.band { margin: -24px -24px 20px; padding: 20px 24px; border-bottom: 3px solid var(--ink); border-radius: 15px 15px 0 0; color: #fff; }
+.band .kicker { color: inherit; opacity: .85; }
+.band h2 { margin: 4px 0 0; }
+.panel p.peminatan { margin: 0 0 10px; font: 800 1rem/1.3 var(--body); color: var(--teal); }
+
+
+/* ---------- PILIH MAP (BAGAN BERCABANG) ---------- */
+#select { padding: 0; display: block; overflow: hidden; background: #1a1008; }
+.sel-screen { display: flex; flex-direction: column; width: 100%; height: 100%; }
+.sel-top, .sel-bot { background: #4b0a8a; color: #fff; padding: 10px 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.sel-top { padding-top: calc(10px + env(safe-area-inset-top, 0px)); border-bottom: 3px solid #0b0907; }
+.sel-bot { padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px)); border-top: 3px solid #0b0907; font-size: .9rem; }
+.sel-top h2 { margin: 0; font: 400 clamp(1.3rem, 4vw, 2rem)/1 var(--display); text-transform: uppercase; letter-spacing: .03em; }
+.sel-top span { font-weight: 800; font-size: .9rem; white-space: nowrap; }
+.sel-body {
+  flex: 1; min-height: 0; overflow: auto;
+  background:
+    radial-gradient(rgba(0,0,0,.38) 1px, transparent 1.6px) 0 0 / 9px 9px,
+    radial-gradient(120% 90% at 50% 50%, transparent 38%, rgba(0,0,0,.7)),
+    repeating-linear-gradient(118deg, rgba(0,0,0,.16) 0 16px, transparent 16px 46px),
+    #86581f;
+}
+.bracket {
+  position: relative; min-height: 100%;
+  display: flex; align-items: center; justify-content: space-around;
+  gap: clamp(24px, 5vw, 80px); padding: 28px clamp(16px, 4vw, 56px);
+}
+.col { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: clamp(14px, 3vw, 34px); }
+.links { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+
+/* Satu kotak = satu map. Gambarnya diambil dari background map itu sendiri. */
+.node {
+  position: relative; display: block; width: clamp(120px, 16vw, 210px); aspect-ratio: 3 / 2; padding: 0;
+  border: 4px solid #0b0907; background-color: #0b0907; background-size: cover; background-position: center bottom;
+  color: #fff; cursor: pointer; box-shadow: 0 5px 0 rgba(0,0,0,.6);
+  filter: brightness(.62) saturate(.85); transition: transform .1s, filter .15s;
+}
+.node .lbl {
+  position: absolute; left: 0; right: 0; bottom: 0; padding: 6px 8px;
+  background: rgba(11, 9, 7, .8); text-align: center; text-wrap: balance;
+  font: 400 clamp(.78rem, 1.6vw, 1rem)/1.15 var(--display);
+}
+.node:hover, .node:focus-visible { filter: none; transform: translateY(-3px); }
+.node.done { filter: none; }                       /* sudah selesai: terang + centang */
+.node.static { cursor: default; }
+.node.static:hover { transform: none; }
+.node.locked, .node.locked:hover { cursor: not-allowed; transform: none; filter: brightness(.45) grayscale(.5); }
+.node.final.done { border-color: var(--sun); }
+.node .chk { position: absolute; left: -14px; top: -20px; width: 62%; height: auto; pointer-events: none; filter: drop-shadow(0 3px 0 rgba(0,0,0,.5)); }
+
+@media (max-width: 700px) {
+  .bracket { flex-direction: column; justify-content: flex-start; gap: 38px; }
+  .col { flex-direction: row; }
+  .node { width: min(150px, calc((100vw - 64px) / 3)); }
+}
+
+
+/* ---------- PESAN "PUTAR HP" ---------- */
+#putar {
+  display: none; position: fixed; inset: 0; z-index: 50; padding: 24px;
+  background: var(--ink); color: #fff; text-align: center; place-items: center;
+  font: 400 1.5rem/1.3 var(--display);
+}
+@media (orientation: portrait) and (max-width: 700px) {
+  body.bermain #putar { display: grid; }
+}
